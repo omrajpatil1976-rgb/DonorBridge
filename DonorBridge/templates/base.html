@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="DonorBridge blood donor directory">
+    <title>{% block title %}DonorBridge | Blood Donor Directory{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="brand" href="{{ url_for('index') }}">
+                <span class="brand-mark" aria-hidden="true">+</span>
+                <span>DonorBridge</span>
+            </a>
+            <span class="header-caption">Blood Donor Directory</span>
+        </div>
+    </header>
+    <main class="page-shell">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <section class="flash-list" aria-label="Notifications">
+                    {% for category, message in messages %}
+                        <p class="flash flash-{{ category }}" role="status">{{ message }}</p>
+                    {% endfor %}
+                </section>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="site-footer">DonorBridge is a directory only and does not medically verify donor eligibility.</footer>
+</body>
+</html>

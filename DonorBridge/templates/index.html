@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+    <div>
+        <p class="eyebrow">COMMUNITY DONOR DIRECTORY</p>
+        <h1>Every connection can make a difference.</h1>
+        <p class="hero-copy">Find and manage volunteer donor records in one simple place.</p>
+    </div>
+    <span class="hero-symbol" aria-hidden="true">+</span>
+</section>
+
+<section class="summary-grid" aria-label="Donor summary">
+    <article class="summary-card">
+        <span class="summary-label">Total donors</span>
+        <strong>{{ summary.total if summary else "—" }}</strong>
+    </article>
+    <article class="summary-card">
+        <span class="summary-label">Available</span>
+        <strong class="number-green">{{ summary.available if summary else "—" }}</strong>
+    </article>
+    <article class="summary-card">
+        <span class="summary-label">Unavailable</span>
+        <strong class="number-muted">{{ summary.unavailable if summary else "—" }}</strong>
+    </article>
+</section>
+
+<div class="content-grid">
+    <section class="panel registration-panel">
+        <div class="panel-heading">
+            <div>
+                <p class="eyebrow">GET STARTED</p>
+                <h2>Register a donor</h2>
+            </div>
+            <span class="heading-icon" aria-hidden="true">+</span>
+        </div>
+        <form action="{{ url_for('add_donor') }}" method="post" class="donor-form">
+            <label for="name">Donor name <span class="required">*</span></label>
+            <input id="name" name="name" type="text" maxlength="100" required placeholder="Enter full name">
+
+            <label for="blood_group">Blood group <span class="required">*</span></label>
+            <select id="blood_group" name="blood_group" required>
+                <option value="">Select blood group</option>
+                {% for group in blood_groups %}
+                    <option value="{{ group }}">{{ group }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="city">City <span class="required">*</span></label>
+            <input id="city" name="city" type="text" maxlength="100" required placeholder="Enter city">
+
+            <label for="contact">Contact number <span class="required">*</span></label>
+            <input id="contact" name="contact" type="tel" maxlength="20" required placeholder="Enter contact number">
+
+            <label for="availability">Availability <span class="required">*</span></label>
+            <select id="availability" name="availability" required>
+                <option value="true">Available</option>
+                <option value="false">Unavailable</option>
+            </select>
+
+            <button class="button button-primary button-wide" type="submit">Add donor</button>
+        </form>
+    </section>
+
+    <section class="panel directory-panel">
+        <div class="panel-heading directory-heading">
+            <div>
+                <p class="eyebrow">DIRECTORY</p>
+                <h2>Donor records</h2>
+            </div>
+            {% if donors is not none %}
+                <span class="record-count">{{ donors|length }} shown</span>
+            {% endif %}
+        </div>
+        <form action="{{ url_for('index') }}" method="get" class="filter-form">
+            <div class="filter-field">
+                <label for="filter-blood-group">Blood group</label>
+                <select id="filter-blood-group" name="blood_group">
+                    <option value="">All groups</option>
+                    {% for group in blood_groups %}
+                        <option value="{{ group }}" {% if selected_blood_group == group %}selected{% endif %}>{{ group }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-field">
+                <label for="filter-city">City</label>
+                <input id="filter-city" name="city" type="search" value="{{ city_filter }}" placeholder="Search city">
+            </div>
+            <button class="button button-secondary" type="submit">Search</button>
+            <a class="reset-link" href="{{ url_for('index') }}">Reset filters</a>
+        </form>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Donor</th>
+                        <th>Blood group</th>
+                        <th>City</th>
+                        <th>Contact</th>
+                        <th>Availability</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if donors is none %}
+                        <tr><td colspan="7" class="empty-state">Records could not be loaded. Check the message above and your database configuration.</td></tr>
+                    {% elif donors %}
+                        {% for donor in donors %}
+                            <tr>
+                                <td class="id-cell">{{ donor.id }}</td>
+                                <td class="name-cell">{{ donor.name }}</td>
+                                <td><span class="blood-tag">{{ donor.blood_group }}</span></td>
+                                <td>{{ donor.city }}</td>
+                                <td>{{ donor.contact }}</td>
+                                <td>
+                                    {% if donor.availability %}
+                                        <span class="availability availability-yes">Available</span>
+                                    {% else %}
+                                        <span class="availability availability-no">Unavailable</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="actions">
+                                        <a class="button button-small button-edit" href="{{ url_for('edit_donor', donor_id=donor.id) }}">Edit</a>
+                                        <form action="{{ url_for('delete_donor', donor_id=donor.id) }}" method="post" onsubmit="return confirm('Delete this donor record?');">
+                                            <button class="button button-small button-delete" type="submit">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr><td colspan="7" class="empty-state">No donor records found. Add a donor or change your filters.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}
